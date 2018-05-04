@@ -1,5 +1,7 @@
 package com.ardasatata.testmap_pedagangapp;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Created by ardasatata on 5/1/18.
  */
@@ -9,6 +11,8 @@ public class User {
     String id;
     String name;
     String email;
+    String alamat;
+    LatLng latLng;
 
     public User() {
     }

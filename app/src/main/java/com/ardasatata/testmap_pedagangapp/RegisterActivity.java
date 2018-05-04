@@ -104,7 +104,7 @@ public class RegisterActivity extends Activity {
                     String userId = FireUser.getUid();
 
 
-                    Pedagang registerPedagang = new Pedagang(new LatLng(0,0),false,userId,email);
+                    Pedagang registerPedagang = new Pedagang(userId,email);
 
                     pedagangDatabase.child(userId).setValue(registerPedagang);
                 }
