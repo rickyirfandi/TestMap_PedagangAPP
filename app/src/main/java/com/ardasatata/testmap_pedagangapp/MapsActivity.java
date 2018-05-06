@@ -1,10 +1,14 @@
 package com.ardasatata.testmap_pedagangapp;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.annotation.NonNull;
@@ -35,8 +39,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
@@ -53,6 +60,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Button hide;
 
     Button findLocation;
+
+    Button profile;
 
     Pedagang test1;
 
@@ -79,12 +88,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LatLng currentPos;
 
+
+    DatabaseReference targetRef;
+
     @Override
     protected void onStart() {
         super.onStart();
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
+
+        getDeviceLocation();
 
         pedagangOnline();
 
@@ -109,6 +123,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        profile = findViewById(R.id.profileMaps);
+
         firebaseAuth = FirebaseAuth.getInstance();
 
         if(firebaseAuth.getCurrentUser() == null){
@@ -119,6 +135,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             finish();
 
         }
+
+        profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+            }
+        });
 
         getLocationPermission();
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -136,9 +159,63 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         pedagangDatabase = FirebaseDatabase.getInstance().getReference("pedagang");
 
+
         FirebaseUser FireUser = FirebaseAuth.getInstance().getCurrentUser();
 
         pedagangId = FireUser.getUid();
+
+        targetRef = FirebaseDatabase.getInstance().getReference("pedagang").child(pedagangId).child("target");
+
+        targetRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                final Target targetPedagang = dataSnapshot.getValue(Target.class);
+
+                if (targetPedagang!=null){
+                    AlertDialog.Builder builder;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        builder = new AlertDialog.Builder(MapsActivity.this, android.R.style.Theme_Material_Dialog_Alert);
+                    } else {
+                        builder = new AlertDialog.Builder(MapsActivity.this);
+                    }
+                    builder.setTitle("Seseorang memanggil anda")
+                            .setMessage("Apakah anda bisa?")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    // Create a Uri from an intent string. Use the result to create an Intent.
+                                    Uri gmmIntentUri = Uri.parse("google.navigation:q="+targetPedagang.getLatLng().getLatitude()+","+targetPedagang.getLatLng().getLongitude());
+
+                                    // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
+                                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                                    // Make the Intent explicit by setting the Google Maps package
+                                    mapIntent.setPackage("com.google.android.apps.maps");
+
+                                    targetRef.setValue(null);
+
+                                    // Attempt to start an activity that can handle the Intent
+                                    startActivity(mapIntent);
+
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // do nothing
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
 
         findLocation.setOnClickListener(new View.OnClickListener() {
@@ -160,7 +237,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        test1 = new Pedagang(new LatLng(38.609556, -1.139637),true,"Tahu Campur Pak Sukir","hehe");
+        //test1 = new Pedagang(new LatLng(38.609556, -1.139637),true,"Tahu Campur Pak Sukir","hehe");
 
         show.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,6 +252,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mapFragment.getView().setVisibility(View.INVISIBLE);
             }
         });
+
+
 
     }
 
@@ -210,8 +289,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+//        LatLng sydney = new LatLng(-34, 151);
+//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
 //        mMap.addMarker(new MarkerOptions()
@@ -221,18 +300,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                .snippet("Snippet1")
 //                );
 
-        mMap.addMarker(new MarkerOptions()
-                .position(test1.getLatlng())
-                .anchor(0.5f, 0.5f)
-                .title(test1.getNamaDagang())
-                .snippet("Snippet1")
-                );
+//        mMap.addMarker(new MarkerOptions()
+//                .position(test1.getLatlng())
+//                .anchor(0.5f, 0.5f)
+//                .title(test1.getNamaDagang())
+//                .snippet("Snippet1")
+//                );
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 Context context = getApplicationContext();
-                CharSequence text = test1.getInfo();
+                CharSequence text = "Your Location";
                 int duration = Toast.LENGTH_SHORT;
 
                 Toast toast = Toast.makeText(context, text, duration);

@@ -1,6 +1,6 @@
 package com.ardasatata.testmap_pedagangapp;
 
-import com.google.android.gms.maps.model.LatLng;
+//import com.google.android.gms.maps.model.LatLng;
 
 /**
  * Created by ardasatata on 4/27/18.
@@ -22,7 +22,7 @@ public class Pedagang {
     public Pedagang(String id, String email) {
         this.id = id;
         this.email = email;
-        this.latlng = new LatLng(0,0);
+        this.latlng = new LatLng(0.0,0.0);
         this.target = new Target(null,null);
         this.namaDagang = "";
         this.info = "";

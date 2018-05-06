@@ -1,6 +1,5 @@
 package com.ardasatata.testmap_pedagangapp;
 
-import com.google.android.gms.maps.model.LatLng;
 
 /**
  * Created by ardasatata on 5/4/18.
