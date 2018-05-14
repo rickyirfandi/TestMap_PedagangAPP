@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,7 +26,7 @@ public class ProfileActivity extends Activity {
     EditText ETemail;
     EditText ETinfo;
 
-    Button BTsave;
+    ImageView BTsave;
 
     LatLng latLng;
 

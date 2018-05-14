@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,7 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends Activity {
 
-    private Button buttonSignIn;
+    private ImageView buttonSignIn;
     private EditText editTextEmail;
     private EditText editTextPassword;
     private TextView textViewSignup;
@@ -46,7 +47,7 @@ public class LoginActivity extends Activity {
 
         editTextEmail = (EditText) findViewById(R.id.loginEmail);
         editTextPassword = (EditText) findViewById(R.id.loginPassword);
-        buttonSignIn = (Button) findViewById(R.id.loginSignIn);
+        buttonSignIn = (ImageView) findViewById(R.id.loginSignIn);
         textViewSignup = (TextView) findViewById(R.id.LoginSignUp);
 
         progressDialog = new ProgressDialog(this);
